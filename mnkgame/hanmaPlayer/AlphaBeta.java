@@ -4,7 +4,12 @@ import mnkgame.*;
 import java.util.Random;
 
 public class AlphaBeta {
-    public int valueF;
+
+    final private boolean first;
+    public AlphaBeta(boolean primoP){
+        first=primoP;
+    }
+
 
     public int gsValue( MNKBoard now ){ // Takes the gamestate and assigns a value depending on the outcome
         int result=0;
@@ -24,11 +29,12 @@ public class AlphaBeta {
             default:
                 break;
         }
+        if(first==false)result=-result;
         return result;
     }
 
 
-    public int maxCompare(int c1, int c2) {//compares two numbers and returns the highest
+    public static int maxCompare(int c1, int c2) {//compares two numbers and returns the highest
         if (c1 > c2)
             return c1;
         if (c2 > c1)
@@ -36,7 +42,7 @@ public class AlphaBeta {
         return c1;
     }
 
-    public int minCompare(int c1, int c2) {//compares two numbers and returns the lowest
+    public static int minCompare(int c1, int c2) {//compares two numbers and returns the lowest
         if (c1 < c2)
             return c1;
         if (c2 < c1)
@@ -44,7 +50,7 @@ public class AlphaBeta {
         return c1;
     }
 
-    public MNKBoard cloneBoard(MNKBoard dollyBoard){//takes the curent board and creates an exact clone 
+    public static MNKBoard cloneBoard(MNKBoard dollyBoard){//takes the curent board and creates an exact clone 
 
         MNKBoard clonedBoard=new MNKBoard(dollyBoard.M, dollyBoard.N, dollyBoard.K); // clone(now)
         MNKCell mkc[]=dollyBoard.getMarkedCells();
@@ -54,13 +60,14 @@ public class AlphaBeta {
         return clonedBoard;
     }
 
-    public MNKBoard birthBoard(MNKBoard now, MNKCell addition){//takes the current board and generates a new one adding the next move
+    public static MNKBoard birthBoard(MNKBoard now, MNKCell addition){//takes the current board and generates a new one adding the next move
         MNKBoard infantBoard = cloneBoard(now);
         infantBoard.markCell(addition.i, addition.j);
         return  infantBoard;
     }
 
     public int engine(MNKBoard situation, boolean player, int lowerBound, int upperBounds){
+        int valueF;
         if(situation.gameState()!= MNKGameState.OPEN){//If we are in a leaf node of the tree evaluate the gamestate using gsValue 
             valueF = gsValue(situation);
         }

@@ -10,6 +10,7 @@ public class hanmaPlayer  implements MNKPlayer {
 	public int localM;
 	public int localN;
 	public int localK;
+	private AlphaBeta testEngine;
 
 	public hanmaPlayer() {
 	}
@@ -20,6 +21,7 @@ public class hanmaPlayer  implements MNKPlayer {
 		localM=M;
 		localK=K;
 		localN=N;
+		testEngine=new AlphaBeta(first);
 		/*
 				TIMEOUT = timeout_in_secs;
 				try {
@@ -41,17 +43,24 @@ public class hanmaPlayer  implements MNKPlayer {
             matchBoard.markCell(MC[i].i, MC[i].j);
         }
 		
-	
-		try {
-			Thread.sleep(1000*2*TIMEOUT);
-		} 
-		catch(Exception e) {
-		}
+		int maxAlpha=Integer.MIN_VALUE;
+		MNKCell maxCell=null;
+		for (MNKCell mnkCell : FC) {
 
+			int actualAlpha=testEngine.engine(AlphaBeta.birthBoard(matchBoard,mnkCell),false,-1,+1);
+			//min and max value in the engine call are -1 and +1 to elevate the number of cuts from the decision tree
+			if(actualAlpha>maxAlpha){
+				maxAlpha=actualAlpha;
+				maxCell=mnkCell;
+				if(maxAlpha==1)break;
+				//if i have found a value 1 move i can already stop cycling through the tree and wasting resources 
+			}
+		}
+		return maxCell;
 		//return FC[rand.nextInt(FC.length)];
 	}
 
 	public String playerName() {
-		return "x";
+		return "hanmaPlayer";
 	}
 }
