@@ -7,7 +7,6 @@ public class AlphaBeta {
 
     final private boolean first;
     private double n1 = 0, n2 = 0, nFree = 0;
-    protected final MNKCellState[][] B;
 
     public AlphaBeta(boolean primoP){
         first=primoP;
