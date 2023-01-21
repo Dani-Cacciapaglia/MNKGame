@@ -6,6 +6,9 @@ import java.util.Random;
 public class AlphaBeta {
 
     final private boolean first;
+    private double n1 = 0, n2 = 0, nFree = 0;
+    protected final MNKCellState[][] B;
+
     public AlphaBeta(boolean primoP){
         first=primoP;
     }
@@ -32,6 +35,16 @@ public class AlphaBeta {
         if(first==false)result=-result;
         return result;
     }
+    private int largeSeriesConstant(int K) {
+        if (K > 4 && nFree == 3)
+          return 1_000; // 1k
+        if (K > 3 && nFree == 2)
+          return 100_000; // 100k
+        if (K > 2 && nFree == 1)
+          return 10_000_000; // 10M
+  
+        return 0;
+      }
 
 
     public static int maxCompare(int c1, int c2) {//compares two numbers and returns the highest
@@ -64,6 +77,71 @@ public class AlphaBeta {
         MNKBoard infantBoard = cloneBoard(now);
         infantBoard.markCell(addition.i, addition.j);
         return  infantBoard;
+    }
+
+        // Values the series which ends at the given cell. dI and dJ denote the
+    // increment which can be used to deduce previous cells in the series.
+    // Cost: O(1)
+    private double cellValue(final int i, final int j, final int dI, final int dJ, MNKBoard B) {
+      if (nFree + n1 + n2 >= B.K) {
+        MNKCellState s = B.cellState(i - dI * B.K,j - dJ * B.K);
+        if (s == MNKCellState.FREE)
+          nFree--;
+        else if (s == MNKCellState.P1)
+          n1--;
+        else
+          n2--;
+      }
+
+      if (B.cellState(i, j) == MNKCellState.FREE)
+        nFree++;
+      else if (B.cellState(i, j) == MNKCellState.P1)
+        n1++;
+      else
+        n2++;
+      int sign = first ? 1 : -1;
+      if (n1 + nFree == B.K)
+        return (sign * (largeSeriesConstant(B.K) + (n1 * n1))/10000000);
+      else if (n2 + nFree == B.K)
+        return (-sign * (largeSeriesConstant(B.K) + (n2 * n2))/10000000);
+      else
+        return 0;
+    }
+
+    private double eval(final int i, final int j,MNKBoard skeleton) {
+      double value = 0;
+
+      // Column
+      n1 = n2 = nFree = 0;
+      for (int ii = 0; ii < skeleton.M; ii++)
+        value += cellValue(ii, j, 1, 0, skeleton);
+
+      // Row
+      n1 = n2 = nFree = 0;
+      for (int jj = 0; jj < skeleton.N; jj++)
+        value += cellValue(i, jj, 0, 1, skeleton);
+
+      // Diagonal
+      int ku = Math.min(i, j),
+          kl = Math.min(skeleton.M - i - 1, skeleton.N - j - 1),
+          ii = i - ku,
+          jj = j - ku,
+          iim = i + kl,
+          jjm = j + kl;
+      n1 = n2 = nFree = 0;
+      for (; ii <= iim && jj <= jjm; ii++, jj++)
+        value += cellValue(ii, jj, 1, 1, skeleton);
+
+      // Anti-diagonal
+      ii = i - ku;
+      jj = j + ku;
+      iim = i + kl;
+      jjm = j - kl;
+      n1 = n2 = nFree = 0;
+      for (; ii <= iim && jj <= jjm; ii++, jj--)
+        value += cellValue(ii, jj, 1, -1, skeleton);
+
+      return value;
     }
 
     public int engine(MNKBoard situation, boolean player, int lowerBound, int upperBounds){
