@@ -33,7 +33,9 @@ public class hanmaPlayer implements MNKPlayer {
 		for (int i = 0; i < MC.length; i++) {
 			matchBoard.markCell(MC[i].i, MC[i].j);
 		}
-
+		double check=testEngine.eval(matchBoard);
+		System.out.println("eval first print");
+		System.out.println(check);
 		double maxAlpha = Integer.MIN_VALUE;
 		MNKCell maxCell = null;
 		System.out.println("approfondimento iterativo");

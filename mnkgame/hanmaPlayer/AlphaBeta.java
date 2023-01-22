@@ -82,7 +82,7 @@ public class AlphaBeta {
         // Values the series which ends at the given cell. dI and dJ denote the
     // increment which can be used to deduce previous cells in the series.
     // Cost: O(1)
-    private double cellValue(final int i, final int j, final int dI, final int dJ, MNKBoard B) {
+    public double cellValue(final int i, final int j, final int dI, final int dJ, MNKBoard B) {
       if (nFree + n1 + n2 >= B.K) {
         MNKCellState s = B.cellState(i - dI * B.K,j - dJ * B.K);
         if (s == MNKCellState.FREE)
@@ -108,7 +108,7 @@ public class AlphaBeta {
         return 0;
     }
 
-    private double eval(MNKBoard skeleton) {
+    public double eval(MNKBoard skeleton) {
 
       double value = 0;
       MNKCell temp[]=skeleton.getMarkedCells();
