@@ -1,15 +1,16 @@
 package mnkgame.hanmaPlayer;
 
 import mnkgame.*;
-import java.util.Random;
+import java.util.concurrent.TimeoutException;
 
 public class AlphaBeta {
 
     final private boolean first;
     private double n1 = 0, n2 = 0, nFree = 0;
 
+
     public AlphaBeta(boolean primoP){
-        first=primoP;
+      first=primoP;
     }
 
 
@@ -46,7 +47,7 @@ public class AlphaBeta {
       }
 
 
-    public static int maxCompare(int c1, int c2) {//compares two numbers and returns the highest
+    public static double maxCompare(double c1, double c2) {//compares two numbers and returns the highest
         if (c1 > c2)
             return c1;
         if (c2 > c1)
@@ -54,7 +55,7 @@ public class AlphaBeta {
         return c1;
     }
 
-    public static int minCompare(int c1, int c2) {//compares two numbers and returns the lowest
+    public static double minCompare(double c1, double c2) {//compares two numbers and returns the lowest
         if (c1 < c2)
             return c1;
         if (c2 < c1)
@@ -107,9 +108,12 @@ public class AlphaBeta {
         return 0;
     }
 
-    private double eval(final int i, final int j,MNKBoard skeleton) {
-      double value = 0;
+    private double eval(MNKBoard skeleton) {
 
+      double value = 0;
+      MNKCell temp[]=skeleton.getMarkedCells();
+      MNKCell lastCell= temp[temp.length-1];
+      int j=lastCell.j,i=lastCell.i;
       // Column
       n1 = n2 = nFree = 0;
       for (int ii = 0; ii < skeleton.M; ii++)
@@ -139,14 +143,25 @@ public class AlphaBeta {
       n1 = n2 = nFree = 0;
       for (; ii <= iim && jj <= jjm; ii++, jj--)
         value += cellValue(ii, jj, 1, -1, skeleton);
-
+      if(first==false)value=-value;
+      assert -1 < value && value < 1;
       return value;
     }
 
-    public int engine(MNKBoard situation, boolean player, int lowerBound, int upperBounds){
-        int valueF;
+    protected void checkTime(long timeout) throws TimeoutException{
+          if(System.currentTimeMillis() > timeout){
+              throw new TimeoutException();
+          }
+  }
+
+    public double engine(MNKBoard situation, boolean player, double lowerBound, double upperBounds, int depth, long timeout) throws TimeoutException{
+        double valueF;
+        checkTime(timeout);
         if(situation.gameState()!= MNKGameState.OPEN){//If we are in a leaf node of the tree evaluate the gamestate using gsValue 
             valueF = gsValue(situation);
+        }
+        else if(depth<=0){
+          return eval(situation);
         }
         else if(player==true){// Else if not leaf evaluate the childs of the current node, a child being the current board + a new move from the freeCells
             valueF = -100;
@@ -154,7 +169,7 @@ public class AlphaBeta {
             for (MNKCell child : situation.getFreeCells()) {
                 //create a board with the new cell
                 MNKBoard newBorn = birthBoard(situation,child);
-                valueF= maxCompare(valueF,engine(newBorn, false, lowerBound, upperBounds)) ;
+                valueF= maxCompare(valueF,engine(newBorn, false, lowerBound, upperBounds, depth-1,timeout)) ;
                 lowerBound=maxCompare(lowerBound, valueF);
                 if(upperBounds<=lowerBound)break;
             }
@@ -163,7 +178,7 @@ public class AlphaBeta {
             valueF=100;
             for (MNKCell child : situation.getFreeCells()){
                 MNKBoard newBorn = birthBoard(situation,child);
-                valueF= minCompare(valueF,engine(newBorn, true, lowerBound, upperBounds)) ;
+                valueF= minCompare(valueF,engine(newBorn, true, lowerBound, upperBounds, depth-1,timeout)) ;
                 upperBounds=minCompare(upperBounds, valueF);
                 if(upperBounds<=lowerBound)break;
             }
