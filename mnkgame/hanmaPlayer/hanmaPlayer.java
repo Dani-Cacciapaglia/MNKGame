@@ -34,11 +34,11 @@ public class hanmaPlayer implements MNKPlayer {
 			matchBoard.markCell(MC[i].i, MC[i].j);
 		}
 		double check=testEngine.eval(matchBoard);
-		System.out.println("eval first print");
-		System.out.println(check);
+		//System.out.println("eval first print");
+		//System.out.println(check);
 		double maxAlpha = Integer.MIN_VALUE;
 		MNKCell maxCell = null;
-		System.out.println("approfondimento iterativo");
+		//System.out.println("approfondimento iterativo");
 		try {
 			for (int depth = 0; depth <= FC.length; depth++) {
 				for (MNKCell mnkCell : FC) {
@@ -57,7 +57,7 @@ public class hanmaPlayer implements MNKPlayer {
 
 				}
 				Double d = maxAlpha;
-				System.out.println(d.toString());
+				//System.out.println(d.toString());
 			}
 		} catch (TimeoutException e) {
 		}
